@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Social Manager - Register</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState } = React;
+const API_URL = "http://10.211.214.157:8000/api/register";
+
+function App() {
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+        setError("");
+
+        if (!name || !email || !password || !confirmPassword) {
+            setError("Please fill in all fields.");
+            return;
+        }
+
+        if (password.length < 4) {
+            setError("Password must be at least 4 characters.");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    password,
+                    confirmPassword
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setSuccess(true);
+            } else {
+                setError("Server Error: HTTP " + response.status + " - " +(data.error || data.message || "Registration failed."));
+            }
+        } catch (error) {
+            setError("Connection Error: " + error.message);
+            console.error("Server Error:", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    if (success) {
+        return (
+            <div className="container">
+                <h1>Registration Successful!</h1>
+                <p className="success">Your account has been created.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="container">
+            <h1>Create Account</h1>
+
+            <form onSubmit={handleSubmit}>
+                <label>Name</label>
+                <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter your name"
+                />
+
+                <label>Email</label>
+                <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                />
+
+                <label>Password</label>
+                <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter password"
+                />
+
+                <label>Confirm Password</label>
+                <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm password"
+                />
+
+                {error && <p className="error">{error}</p>}
+
+                <button type="submit" disabled={loading}>
+                    {loading ? "Creating Account..." : "Register"}
+                </button>
+            </form>
+        </div>
+    );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
