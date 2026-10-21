@@ -82,7 +82,8 @@ function App() {
 
     return (
         <div className="container">
-            <h1>Create Account</h1>
+            <h1>New Clown Unlocked! 🤡</h1>
+            <p className="subtitle"> Sign up first, regret later. 🤝 </p>
 
             <form onSubmit={handleSubmit}>
                 <label>Name</label>
@@ -123,6 +124,7 @@ function App() {
                     {loading ? "Creating Account..." : "Register"}
                 </button>
             </form>
+            <p className="form-footer"> Already have an account? <a href="Login.html"> Login</a></p>
         </div>
     );
 }
