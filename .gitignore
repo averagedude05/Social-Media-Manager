@@ -1,2 +1,5 @@
 .env
 .env.*git 
+*.json
+
+__pycache__/
