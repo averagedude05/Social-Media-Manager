@@ -25,7 +25,9 @@ class RegisterUser(BaseModel):
     password:str
     confirmPassword:str
 
-
+class LoginUser(BaseModel):
+    password:str
+    email:str
 
 
 @app.get("/")
@@ -33,17 +35,9 @@ def get_welcome_message():
     return {"message": "Welcome to the API"}
 
 
-
-@app.get("/api/register")
-def printOk():
-    return {"message": "ok"}
-
-
-
-
 @app.post("/api/register")
 def createnewUser(data: RegisterUser, db: Session = Depends(get_db)):
-    if(len(data.password) and len(data.confirmPassword)<4 and len(data.email)==0):
+    if len(data.password) and len(data.confirmPassword)<4 and len(data.email)==0:
         return JSONResponse(status_code=400,content={"error": "password must be atleast 4 characters"})
     if data.password != data.confirmPassword:
         return JSONResponse(status_code=400, content={"error": "Passwords do not match"})
@@ -57,3 +51,17 @@ def createnewUser(data: RegisterUser, db: Session = Depends(get_db)):
         db.rollback()
         return JSONResponse(status_code=500, content={"error": str(e)})
        
+@app.post("/api/login") 
+def checkUser(data:LoginUser, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == data.email).first()
+    if user is None:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "User doesn't exist"}
+        )
+    if user.password != data.password:
+        return JSONResponse(
+            status_code=401,
+            content={"error": "Invalid email or password"}
+        )
+    return {"message": "Login successful"}
